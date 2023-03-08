@@ -1,0 +1,27 @@
+import xml.etree.ElementTree as ET
+import cx_Oracle
+
+# establish database connection
+dsn = cx_Oracle.makedsn(host='localhost', port='1521', sid='ORCL')
+conn = cx_Oracle.connect(user='username', password='password', dsn=dsn)
+
+# get a cursor
+cursor = conn.cursor()
+
+# parse the XML file
+tree = ET.parse('data.xml')
+root = tree.getroot()
+
+# iterate over the data elements and insert into the database
+for data in root.findall('data'):
+    field1 = data.find('field1').text
+    field2 = data.find('field2').text
+    field3 = data.find('field3').text
+
+    cursor.execute('INSERT INTO mytable (field1, field2, field3) VALUES (:field1, :field2, :field3)',
+                   {'field1': field1, 'field2': field2, 'field3': field3})
+
+# commit the changes and close the cursor and connection
+conn.commit()
+cursor.close()
+conn.close()
